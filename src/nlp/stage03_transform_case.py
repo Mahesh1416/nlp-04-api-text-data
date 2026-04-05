@@ -47,15 +47,7 @@ def run_transform(
     json_data: list[dict[str, Any]],
     LOG: logging.Logger,
 ) -> pl.DataFrame:
-    """Transform JSON into a structured DataFrame.
 
-    Args:
-        json_data (list[dict[str, Any]]): Validated JSON data.
-        LOG (logging.Logger): The logger instance.
-
-    Returns:
-        pl.DataFrame: The transformed dataset.
-    """
     LOG.info("========================")
     LOG.info("STAGE 03: TRANSFORM starting...")
     LOG.info("========================")
@@ -65,19 +57,19 @@ def run_transform(
     for record in json_data:
         records.append(
             {
-                "user_id": record["userId"],
-                "post_id": record["id"],
-                "title": record["title"],
+                "post_id": record["postId"],
+                "comment_id": record["id"],
+                "name": record["name"],
+                "email": record["email"],
                 "body": record["body"],
             }
         )
 
     df: pl.DataFrame = pl.DataFrame(records)
 
-    # Derived fields
+    # ✅ FIXED: use body instead of title
     df = df.with_columns(
         [
-            pl.col("title").str.len_chars().alias("title_length"),
             pl.col("body").str.len_chars().alias("body_length"),
         ]
     )
@@ -86,5 +78,4 @@ def run_transform(
     LOG.info(f"DataFrame preview:\n{df.head()}")
     LOG.info("Sink: Polars DataFrame created")
 
-    # Return the transformed DataFrame for use in the next stage.
     return df
